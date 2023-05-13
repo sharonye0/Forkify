@@ -1,11 +1,11 @@
-import { async } from 'regenerator-runtime';
-import { API_URL, RES_PER_PAGE, KEY } from './config.js';
-import { AJAX } from './helpers.js';
+import { async } from "regenerator-runtime";
+import { API_URL, RES_PER_PAGE, KEY } from "./config.js";
+import { AJAX } from "./helpers.js";
 
 export const state = {
   recipe: {},
   search: {
-    query: '',
+    query: "",
     results: [],
     page: 1,
     resultsPerPage: RES_PER_PAGE,
@@ -31,6 +31,7 @@ const createRecipeObject = function (data) {
 export const loadRecipe = async function (id) {
   try {
     const data = await AJAX(`${API_URL}${id}?key=${KEY}`);
+    console.log(data);
     state.recipe = createRecipeObject(data);
 
     if (state.bookmarks.some(bookmark => bookmark.id === id))
@@ -49,6 +50,8 @@ export const loadSearchResults = async function (query) {
   try {
     state.search.query = query;
 
+    console.log(query);
+
     const data = await AJAX(`${API_URL}?search=${query}&key=${KEY}`);
     console.log(data);
 
@@ -61,6 +64,7 @@ export const loadSearchResults = async function (query) {
         ...(rec.key && { key: rec.key }),
       };
     });
+    console.log(state.search.results);
     state.search.page = 1;
   } catch (err) {
     console.error(`${err} 💥💥💥💥`);
@@ -87,7 +91,7 @@ export const updateServings = function (newServings) {
 };
 
 const persistBookmarks = function () {
-  localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+  localStorage.setItem("bookmarks", JSON.stringify(state.bookmarks));
 };
 
 export const addBookmark = function (recipe) {
@@ -112,13 +116,13 @@ export const deleteBookmark = function (id) {
 };
 
 const init = function () {
-  const storage = localStorage.getItem('bookmarks');
+  const storage = localStorage.getItem("bookmarks");
   if (storage) state.bookmarks = JSON.parse(storage);
 };
 init();
 
 const clearBookmarks = function () {
-  localStorage.clear('bookmarks');
+  localStorage.clear("bookmarks");
 };
 
 // clearBookmarks();
@@ -126,12 +130,12 @@ const clearBookmarks = function () {
 export const uploadRecipe = async function (newRecipe) {
   try {
     const ingredients = Object.entries(newRecipe)
-      .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+      .filter(entry => entry[0].startsWith("ingredient") && entry[1] !== "")
       .map(ing => {
-        const ingArr = ing[1].split(',').map(el => el.trim());
+        const ingArr = ing[1].split(",").map(el => el.trim());
         if (ingArr.length !== 3)
           throw new Error(
-            'Wrong ingredient fromat! Please use the correct format :)'
+            "Wrong ingredient fromat! Please use the correct format :)"
           );
 
         const [quantity, unit, description] = ingArr;
@@ -148,6 +152,7 @@ export const uploadRecipe = async function (newRecipe) {
       servings: +newRecipe.servings,
       ingredients,
     };
+    console.log(recipe);
 
     const data = await AJAX(`${API_URL}?key=${KEY}`, recipe);
     state.recipe = createRecipeObject(data);
